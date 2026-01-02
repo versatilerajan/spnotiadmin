@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SP Noti Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .card {
+      background: #fff;
+      padding: 25px;
+      width: 350px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input, textarea, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: none;
+      height: 80px;
+    }
+
+    button {
+      background: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background: #125aa0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="card" id="loginBox">
+    <h2>Admin Login</h2>
+    <input type="text" id="adminId" placeholder="Admin ID">
+    <input type="password" id="adminPass" placeholder="Admin Password">
+    <button onclick="login()">Login</button>
+    <div class="error" id="loginError"></div>
+  </div>
+
+  <!-- POST PANEL -->
+  <div class="card hidden" id="postBox">
+    <h2>Post Notification</h2>
+    <input type="text" id="title" placeholder="Title">
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="text" id="photo" placeholder="Google Drive Image Link">
+    <button onclick="postNotification()">Post</button>
+    <div class="success" id="postSuccess"></div>
+    <div class="error" id="postError"></div>
+  </div>
+
+<script>
+  const API_BASE = "https://spnotificationdbmongodb.vercel.app";
+
+  function login() {
+    const adminId = document.getElementById("adminId").value;
+    const adminPass = document.getElementById("adminPass").value;
+
+    fetch(`${API_BASE}/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminId, adminPass })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("postBox").classList.remove("hidden");
+      } else {
+        document.getElementById("loginError").innerText = "Invalid credentials";
+      }
+    })
+    .catch(() => {
+      document.getElementById("loginError").innerText = "Server error";
+    });
+  }
+
+  function postNotification() {
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+    const photo = document.getElementById("photo").value;
+
+    fetch(`${API_BASE}/posts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, description, photo })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data._id) {
+        document.getElementById("postSuccess").innerText = "Posted successfully!";
+        document.getElementById("postError").innerText = "";
+      } else {
+        document.getElementById("postError").innerText = "Failed to post";
+      }
+    })
+    .catch(() => {
+      document.getElementById("postError").innerText = "Server error";
+    });
+  }
+</script>
+
+</body>
+</html>
